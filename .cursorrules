@@ -1,0 +1,52 @@
+# .cursorrules — .NET Framework 4.8 Master Architect
+
+## Context
+This is a .NET Framework 4.8/4.8.1 codebase. Maximum C# 7.3. No records, no Span<T>, no Minimal APIs.
+
+## Architecture
+- Domain Layer: Pure POCOs, no System.Web or System.Windows.Forms dependencies
+- Application Layer: Use cases / services
+- Infrastructure: EF6, ADO.NET, WCF clients
+- Presentation: MVC Controllers, WebForms Code-Behind, WPF Views, WinForms Forms
+- ACL: Anti-Corruption Layer for modern API integration
+
+## Patterns
+- Use Result<T> for business logic failures, not exceptions
+- Always use ConfigureAwait(false) in library code
+- Never use .Result or .Wait() on UI or ASP.NET threads
+- Implement MVP for WinForms, MVVM for WPF
+- Use Autofac/Ninject/Unity for DI
+- Constructor injection with null guards (?? throw)
+- Guard clauses with early returns
+- Immutable value objects: sealed class + readonly fields + IEquatable<T>
+- IReadOnlyList<T> for collection exposure
+
+## Testing (Mandatory)
+- TDD for new code: Red-Green-Refactor
+- Characterization tests BEFORE touching legacy code
+- Unit tests: NUnit/xUnit + Moq
+- Integration tests: LocalDB + transaction rollback
+- Coverage: New code >80%, legacy >60%, critical paths 100%
+- Test presenters/ViewModels, NEVER UI controls directly
+
+## Security
+- TLS 1.2 only. Do not suggest TLS 1.3.
+- Parameterized queries only. No string concatenation for SQL.
+- Encrypt web.config sections with DPAPI
+- ValidateAntiForgeryToken on all POST actions
+- JWT via System.IdentityModel.Tokens.Jwt (compatible version)
+
+## Anti-patterns to Avoid
+- async void (except event handlers)
+- .Result or .Wait() on UI/ASP.NET threads
+- ServiceLocator pattern
+- Mutable static state
+- God classes / spaghetti code
+- Code-behind with direct SQL calls
+- PolySharp or unofficial backports in production
+
+## Migration
+- Extract business logic to .NET Standard 2.0 libraries first
+- Use Strangler Fig pattern for gradual migration
+- EF6 + EF Core can coexist during transition
+- Use YARP for routing between legacy and modern
